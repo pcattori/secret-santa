@@ -5,35 +5,33 @@ import random
 
 from load_data import load_participants, load_past_assignments
 
+Participant = collections.namedtuple('Participant', ['name', 'role'])
+
 def From(name):
-  return (name, 'from')
+  return Participant(name, 'from')
 
 def To(name):
-  return (name, 'to')
+  return Participant(name, 'to')
 
 def assign(participants, past_assignments):
   graph = nx.DiGraph()
-  graph.add_nodes_from(
-    (From(participant) for participant in participants.iterkeys()),
-    bipartite=0
-  )
-  graph.add_nodes_from(
-    (To(participant) for participant in participants.iterkeys()),
-    bipartite=1
-  )
+
+  from_participants = [From(participant) for participant in participants.iterkeys()]
+  graph.add_nodes_from(from_participants, bipartite=0)
+
+  to_participants = [To(participant) for participant in participants.iterkeys()]
+  graph.add_nodes_from(to_participants, bipartite=1)
+
   graph.add_edges_from(
     (From(_from), To(to))
     for _from, to in itertools.permutations(participants.iterkeys(),2)
-  )
-  graph.remove_edges_from(
-    (From(_from), To(to))
-    for _from, to in past_assignments.iteritems()
+    if past_assignments.get(_from, None) != to
   )
 
   return {
-    _from[0]: to[0]
+    _from.name: to.name
     for _from, to in nx.bipartite.maximum_matching(graph).iteritems()
-    if _from[1] == 'from'
+    if _from.role == 'from'
   }
 
 def main():
