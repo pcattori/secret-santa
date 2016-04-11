@@ -16,10 +16,10 @@ def To(name):
 def assign(participants, past_assignments):
   graph = nx.DiGraph()
 
-  from_participants = [From(participant) for participant in participants.iterkeys()]
+  from_participants = (From(participant) for participant in participants.iterkeys())
   graph.add_nodes_from(from_participants, bipartite=0)
 
-  to_participants = [To(participant) for participant in participants.iterkeys()]
+  to_participants = (To(participant) for participant in participants.iterkeys())
   graph.add_nodes_from(to_participants, bipartite=1)
 
   graph.add_edges_from(
